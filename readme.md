@@ -42,7 +42,7 @@ module.exports = app;
 ```yml
 # serverless.yml
 
-fastify:
+hapi:
   component: '@twn39/tencent-hapi'
   inputs:
     region: ap-shanghai
