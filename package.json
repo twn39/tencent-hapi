@@ -1,7 +1,7 @@
 {
     "name": "@twn39/tencent-hapi",
     "version": "1.0.0",
-    "description": "",
+    "description": "serverless tencent hapi component",
     "keywords": [
         "serverless",
         "hapi",
@@ -29,5 +29,14 @@
         "tabWidth": 4,
         "semi": true,
         "singleQuote": true
-    }
+    },
+    "devDependencies": {},
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/twn39/tencent-hapi.git"
+    },
+    "bugs": {
+        "url": "https://github.com/twn39/tencent-hapi/issues"
+    },
+    "homepage": "https://github.com/twn39/tencent-hapi#readme"
 }
