@@ -1,6 +1,6 @@
 {
     "name": "@twn39/tencent-hapi",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "serverless tencent hapi component",
     "keywords": [
         "serverless",
