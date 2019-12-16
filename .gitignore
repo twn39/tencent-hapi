@@ -1,0 +1,6 @@
+.idea
+.serverless
+node_modules
+.env_temp
+app.js
+package-lock.json

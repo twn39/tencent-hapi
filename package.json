@@ -1,0 +1,33 @@
+{
+    "name": "tencent-hapi",
+    "version": "1.0.0",
+    "description": "",
+    "keywords": [
+        "serverless",
+        "hapi",
+        "component",
+        "tencent",
+        "function",
+        "lambda",
+        "api-gateway"
+    ],
+    "main": "serverless.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "twn39 <twn39@163.com>",
+    "license": "ISC",
+    "dependencies": {
+        "@serverless/core": "^1.1.2",
+        "@serverless/tencent-apigateway": "^1.9.10",
+        "@serverless/tencent-scf": "^1.2.3",
+        "ext": "^1.4.0",
+        "type": "^2.0.0"
+    },
+    "prettier": {
+        "trailingComma": "all",
+        "tabWidth": 4,
+        "semi": true,
+        "singleQuote": true
+    }
+}
