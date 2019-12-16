@@ -25,10 +25,10 @@ module.exports = class TencentHapi extends Component {
 
         inputs.exclude.push('.git/**', '.gitignore', '.serverless', '.DS_Store');
 
-        // const filePath = path.resolve(__dirname, 'lambda.js');
-        // const tencentFastifyPath = path.resolve(__dirname, 'tencent-cloud-fastify.js');
-        // inputs.include.push(filePath);
-        // inputs.include.push(tencentFastifyPath);
+        const filePath = path.resolve(__dirname, 'lambda.js');
+        const tencentHapiPath = path.resolve(__dirname, 'tencent-cloud-hapi.js');
+        inputs.include.push(filePath);
+        inputs.include.push(tencentHapiPath);
         inputs.handler = 'lambda.handler';
         inputs.runtime = 'Nodejs8.9';
 
