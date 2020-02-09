@@ -42,6 +42,7 @@ module.exports = class TencentHapi extends Component {
             if (inputs.functionConf.vpcConfig) inputs.vpcConfig = inputs.functionConf.vpcConfig;
         }
 
+        inputs.fromClientRemark = inputs.fromClientRemark || 'tencent-hapi';
         const tencentCloudFunctionOutputs = await tencentCloudFunction(inputs);
         const apigwParam = {
             serviceName: inputs.serviceName,
@@ -66,21 +67,25 @@ module.exports = class TencentHapi extends Component {
 
         this.state.functionName = inputs.name;
         await this.save();
+        apigwParam.fromClientRemark = inputs.fromClientRemark || 'tencent-hapi';
         const tencentApiGatewayOutputs = await tencentApiGateway(apigwParam);
         return {
-            region: inputs.region,
+            region: tencentApiGatewayOutputs.region,
             functionName: inputs.name,
             apiGatewayServiceId: tencentApiGatewayOutputs.serviceId,
-            url: `${tencentApiGatewayOutputs.protocol}://${tencentApiGatewayOutputs.subDomain}/${tencentApiGatewayOutputs.environment}/`,
+            url: `${tencentApiGatewayOutputs.protocols[0]}://${tencentApiGatewayOutputs.subDomain}/${tencentApiGatewayOutputs.environment}/`,
         };
     }
 
-    async remove() {
+    async remove(inputs = {}) {
+        const removeInput = {
+            fromClientRemark: inputs.fromClientRemark || 'tencent-hapi'
+        };
         const tencentApiGateway = await this.load('@serverless/tencent-apigateway');
         const tencentCloudFunction = await this.load('@serverless/tencent-scf');
 
-        await tencentApiGateway.remove();
-        await tencentCloudFunction.remove();
+        await tencentApiGateway.remove(removeInput);
+        await tencentCloudFunction.remove(removeInput);
 
         return {};
     }

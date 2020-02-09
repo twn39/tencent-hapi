@@ -1,12 +1,6 @@
 const qs = require('querystring');
 
-module.exports = (app, options) => (event, context, callback) => {
-    options = options || {};
-    options.binaryMimeTypes = options.binaryMimeTypes || [];
-    if (options.callbackWaitsForEmptyEventLoop !== undefined) {
-        context.callbackWaitsForEmptyEventLoop =
-            options.callbackWaitsForEmptyEventLoop;
-    }
+module.exports = (app) => (event, context) => {
     event.body = event.body || '';
 
     const method = event.httpMethod;
@@ -43,21 +37,11 @@ module.exports = (app, options) => (event, context, callback) => {
                 }
             });
 
-            const contentType = (
-                res.headers['content-type'] ||
-                res.headers['Content-Type'] ||
-                ''
-            ).split(';')[0];
-            const isBase64Encoded =
-                options.binaryMimeTypes.indexOf(contentType) > -1;
-
             return {
                 statusCode: res.statusCode,
-                body: isBase64Encoded
-                    ? res.rawPayload.toString('base64')
-                    : res.payload,
+                body: res.payload,
                 headers: res.headers,
-                isBase64Encoded,
+                isBase64Encoded: false,
             };
         })
         .catch(err => {
