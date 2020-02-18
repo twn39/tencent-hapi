@@ -8,6 +8,13 @@ const path = require('path');
 const { Component, utils } = require('@serverless/core');
 
 module.exports = class TencentHapi extends Component {
+    getDefaultProtocol(protocols) {
+        if (protocols.map((i) => i.toLowerCase()).includes('https')) {
+          return 'https'
+        }
+        return 'http'
+    }
+
     async default(inputs = {}) {
         inputs.name =
             ensureString(inputs.functionName, { isOptional: true }) ||
@@ -33,8 +40,6 @@ module.exports = class TencentHapi extends Component {
         inputs.runtime = 'Nodejs8.9';
 
         const tencentCloudFunction = await this.load('@serverless/tencent-scf');
-        const tencentApiGateway = await this.load('@serverless/tencent-apigateway');
-
         if (inputs.functionConf) {
             inputs.timeout = inputs.functionConf.timeout || 3;
             inputs.memorySize = inputs.functionConf.memorySize || 128;
@@ -44,37 +49,53 @@ module.exports = class TencentHapi extends Component {
 
         inputs.fromClientRemark = inputs.fromClientRemark || 'tencent-hapi';
         const tencentCloudFunctionOutputs = await tencentCloudFunction(inputs);
-        const apigwParam = {
-            serviceName: inputs.serviceName,
-            description: 'Serverless Framework tencent-hapi Component',
-            serviceId: inputs.serviceId,
-            region: inputs.region,
-            protocol: apigatewayConf.protocol || 'http',
-            environment: apigatewayConf.environment || 'release',
-            endpoints: [
-                {
-                    path: '/',
-                    method: 'ANY',
-                    function: {
-                        isIntegratedResponse: true,
-                        functionName: tencentCloudFunctionOutputs.Name,
-                    },
-                },
-            ],
-        };
-        if (apigatewayConf.usagePlan) apigwParam.endpoints[0].usagePlan = apigatewayConf.usagePlan;
-        if (apigatewayConf.auth) apigwParam.endpoints[0].auth = inputs.apigatewayConf.auth;
 
+        const outputs = {
+            region: inputs.region,
+            functionName: inputs.name,
+        };
+
+        // if not disable, then create apigateway
+        if (!apigatewayConf.isDisabled) {
+            const tencentApiGateway = await this.load('@serverless/tencent-apigateway');
+            const apigwParam = {
+                serviceName: inputs.serviceName,
+                description: 'Serverless Framework tencent-hapi Component',
+                serviceId: inputs.serviceId,
+                region: inputs.region,
+                protocols: apigatewayConf.protocols || ['http'],
+                environment: apigatewayConf.environment || 'release',
+                endpoints: [
+                    {
+                        path: '/',
+                        method: 'ANY',
+                        function: {
+                            isIntegratedResponse: true,
+                            functionName: tencentCloudFunctionOutputs.Name,
+                        },
+                    },
+                ],
+                customDomain: apigatewayConf.customDomain,
+            };
+            if (apigatewayConf.usagePlan) apigwParam.endpoints[0].usagePlan = apigatewayConf.usagePlan;
+            if (apigatewayConf.auth) apigwParam.endpoints[0].auth = inputs.apigatewayConf.auth;
+    
+            apigwParam.fromClientRemark = inputs.fromClientRemark || 'tencent-hapi';
+            const tencentApiGatewayOutputs = await tencentApiGateway(apigwParam);
+            outputs.apiGatewayServiceId = tencentApiGatewayOutputs.serviceId;
+            outputs.url = `${this.getDefaultProtocol(tencentApiGatewayOutputs.protocols)}://${
+                tencentApiGatewayOutputs.subDomain
+            }/${tencentApiGatewayOutputs.environment}/`;
+
+            if (tencentApiGatewayOutputs.customDomains) {
+                outputs.customDomains = tencentApiGatewayOutputs.customDomains;
+            }
+        }
+        
         this.state.functionName = inputs.name;
         await this.save();
-        apigwParam.fromClientRemark = inputs.fromClientRemark || 'tencent-hapi';
-        const tencentApiGatewayOutputs = await tencentApiGateway(apigwParam);
-        return {
-            region: tencentApiGatewayOutputs.region,
-            functionName: inputs.name,
-            apiGatewayServiceId: tencentApiGatewayOutputs.serviceId,
-            url: `${tencentApiGatewayOutputs.protocols[0]}://${tencentApiGatewayOutputs.subDomain}/${tencentApiGatewayOutputs.environment}/`,
-        };
+
+        return outputs;
     }
 
     async remove(inputs = {}) {
